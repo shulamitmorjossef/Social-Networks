@@ -5,11 +5,9 @@ import random
 
 from scipy.stats import linregress
 
-# קריאת הנתונים
 file = pd.read_csv("stormofswords.csv").iloc[1:]
 tribes = pd.read_csv("tribes.csv")
 
-# חילוץ הצמתים והקשתות עם משקל
 nodes = tribes.iloc[:, 0].tolist()
 edges = list(zip(file["Source"], file["Target"], file["Weight"]))
 
