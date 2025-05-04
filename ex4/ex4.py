@@ -36,8 +36,6 @@ def draw_Graph(G, title="Game of Thrones Graph"):
 
     plt.show()
 
-
-
 # --- b.  G(n, m) ---
 def build_gnm_graph():
     original = build_graph()
@@ -55,6 +53,30 @@ def build_configuration_model():
     G = nx.Graph(G)
     G.remove_edges_from(nx.selfloop_edges(G))
     return G
+
+# ------ block model------
+def block_model():
+    original = build_graph()
+    n = original.number_of_nodes()
+
+    # Divide the nodes equally into 3 groups (communities)
+    sizes = [n // 3] * 3
+
+    # Define connection probabilities:
+    # p_in = probability of edges within the same group
+    # p_out = probability of edges between different groups
+    p_in = 0.3
+    p_out = 0.02
+
+    # Create the probability matrix for the stochastic block model
+    # Diagonal values (i == j) use p_in (within group),
+    # Off-diagonal values use p_out (between groups)
+    probs = [[p_in if i == j else p_out for j in range(3)] for i in range(3)]
+
+    G_block = nx.stochastic_block_model(sizes, probs)
+
+    return G_block
+
 
 
 
@@ -252,6 +274,9 @@ def plot_degree_distribution_log_binning(G, bin_count=20):
     plt.grid(True, which="both", ls="--")
     plt.show()
 
+
+
+
 # G = build_graph()
 # plot_degree_distribution_basic(G)
 # plot_degree_distribution_log_binning(G)
@@ -321,6 +346,9 @@ if __name__ == "__main__":
     draw_Graph(build_graph())
     draw_Graph(build_gnm_graph(), "G(n, m) Graph")
     draw_Graph(build_configuration_model(), "Configuration Model Graph")
+    draw_Graph(block_model(), "Block Model Graph")
+
+
 
 
 
