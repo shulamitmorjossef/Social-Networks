@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="9fbeab53-ea15-4d5a-b241-d0ff5df0a795" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ex4/ex4.py" beforeDir="false" afterPath="$PROJECT_DIR$/ex4/ex4.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +37,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/Student/PycharmProjects/networkNet/Social-Networks",
+    "last_opened_file_path": "C:/Users/Student/PycharmProjects/networkNet/Bit-coin",
     "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
   }

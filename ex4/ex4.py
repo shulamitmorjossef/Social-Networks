@@ -170,20 +170,19 @@ def giant_component():
 
     return giant_subgraph
 
-def average_distance():
+def average_distance(G):
     """
     Compute the average distance (average shortest path length) of the graph.
 
     Parameters:
     - G: networkx graph
     """
-    G = build_graph()
     # Check if the graph is connected
     if nx.is_connected(G):
         return nx.average_shortest_path_length(G)
     else:
         return float('inf')  # Return infinity if the graph is disconnected
-
+## TODO SEED
 def calculate_edge_probabilities(G):
     # מציאת קהילות
     communities = list(greedy_modularity_communities(G))
@@ -221,6 +220,26 @@ def calculate_edge_probabilities(G):
     external_prob = total_inter_edges / total_inter_possible if total_inter_possible > 0 else 0
 
     return internal_probs, external_prob
+
+def calculate_all_average_distance():
+    G = build_graph()
+    gnm = build_gnm_graph()
+    c = build_configuration_model()
+    b = block_model()
+    gnp = build_gnp_graph()
+    p = build_preferential_attachment_graph()
+
+    all_graphs = {
+        "Game of Thrones": G,
+        "G(n,p)": gnp,
+        "G(n,m)": gnm,
+        "Configuration Model": c,
+        "Block Model": b,
+        "Preferential Attachment": p
+    }
+
+    for name, G in all_graphs.items():
+        print(name + ": ", average_distance(G))
 
 
 ## up to non drafts ## TODO
@@ -534,10 +553,12 @@ if __name__ == "__main__":
     #
     # print("average_distance: ",average_distance())
 
-    G = build_graph()
-    check_power_law(G)
+    # G = build_graph()
+    # check_power_law(G)
+    #
+    # check_powerlaw_builtin(G)
 
-    check_powerlaw_builtin(G)
+    calculate_all_average_distance()
 
 
 
