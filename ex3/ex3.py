@@ -13,7 +13,6 @@ edges = list(zip(file["Source"], file["Target"], file["Weight"]))
 
 
 
-# חילוץ הצמתים והקשתות עם משקל
 def build_graph():
     G = nx.Graph()
     G.add_nodes_from(nodes)
