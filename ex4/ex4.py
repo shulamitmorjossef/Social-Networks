@@ -1,10 +1,13 @@
 from collections import Counter
+from itertools import combinations
+
 import numpy as np
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 import random
 import numpy as np
+from networkx.algorithms.community.modularity_max import greedy_modularity_communities
 
 from scipy.stats import linregress
 
@@ -43,7 +46,6 @@ def build_gnm_graph():
     m = original.number_of_edges()
     G = nx.gnm_random_graph(n, m)
     return G
-
 
 # --- c. Configuration model ---
 def build_configuration_model():
@@ -101,23 +103,63 @@ def build_preferential_attachment_graph():
     G = nx.barabasi_albert_graph(n=n, m=m)
     return G
 
-def plot_degree_distribution(G, title="Degree Distribution"):
-    """
-    Plot the degree distribution of a graph.
 
-    Parameters:
-    - G: networkx graph
-    - title: string, title for the plot
-    """
+def plot_degree_distribution(G, title):
     degrees = [d for _, d in G.degree()]
-    plt.figure(figsize=(7, 5))
-    plt.hist(degrees, bins=range(1, max(degrees) + 2), alpha=0.6, color="red", edgecolor="black")
-    plt.xlabel("Degree")
-    plt.ylabel("Frequency")
-    plt.title(title)
-    plt.grid(axis='y', alpha=0.3)
+
+    # נתונים לציור
+    max_deg = max(degrees)
+    bins = np.arange(1, max_deg + 2) - 0.5  # bins for integer degrees
+
+    # 1. גרף רגיל
+    plt.figure(figsize=(8, 5))
+    plt.hist(degrees, bins=bins, color='skyblue', edgecolor='black')
+    plt.xlabel('Degree')
+    plt.ylabel('Frequency')
+    plt.title(title + ' (Regular) ')
+    plt.grid(True, linestyle='--', alpha=0.5)
     plt.tight_layout()
     plt.show()
+
+    # 2. גרף מנורמל (צפיפות)
+    plt.figure(figsize=(8, 5))
+    plt.hist(degrees, bins=bins, density=True, color='lightgreen', edgecolor='black')
+    plt.xlabel('Degree')
+    plt.ylabel('Probability Density')
+    plt.title(title + ' (Normalized)')
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.tight_layout()
+    plt.show()
+
+    # 3. גרף עם ציר X לוגריתמי (עמודות)
+    plt.figure(figsize=(8, 5))
+    plt.hist(degrees, bins=bins, color='salmon', edgecolor='black')
+    plt.xscale('log')
+    plt.xlabel('Degree (log scale)')
+    plt.ylabel('Frequency')
+    plt.title(title + ' (Log X-axis)')
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.tight_layout()
+    plt.show()
+
+
+# def plot_degree_distribution(G, title="Degree Distribution"):
+#     """
+#     Plot the degree distribution of a graph.
+#
+#     Parameters:
+#     - G: networkx graph
+#     - title: string, title for the plot
+#     """
+#     degrees = [d for _, d in G.degree()]
+#     plt.figure(figsize=(7, 5))
+#     plt.hist(degrees, bins=range(1, max(degrees) + 2), alpha=0.6, color="red", edgecolor="black")
+#     plt.xlabel("Degree")
+#     plt.ylabel("Frequency")
+#     plt.title(title)
+#     plt.grid(axis='y', alpha=0.3)
+#     plt.tight_layout()
+#     plt.show()
 
 def plot_all_degree_distribution():
     G = build_graph()
@@ -147,14 +189,14 @@ def draw_all_graphes():
     draw_Graph(build_gnp_graph(), "G(n, p) Graph")
     draw_Graph(build_preferential_attachment_graph(), "preferential Attachment Graph")
 
-def giant_component():
+def giant_component(G):
     """
     Plot the Giant Component of the graph.
 
     Parameters:
     - G: networkx graph
     """
-    G = build_graph()
+    # G = build_graph()
     # Find all connected components
     components = list(nx.connected_components(G))
 
@@ -296,45 +338,45 @@ def build_pa_graph(original_graph):
     m = max(m, 1)  # המודל דורש m ≥ 1
     return nx.barabasi_albert_graph(n=n, m=m, seed=42)
 
-def build_probabilistic_preferential_attachment_graph(initial_nodes=3, seed=None):
-    """
-    בונה גרף שבו כל צומת חדש מנסה להתחבר לכל הקיימים, על פי הסתברות פרופורציונלית לדרגה.
-
-    :param n: מספר הקודקודים הסופי בגרף
-    :param initial_nodes: מספר קודקודים להתחלה
-    :param seed: לצורך שיחזור
-    :return: גרף NetworkX
-    """
-    if seed is not None:
-        random.seed(seed)
-
-    G = build_graph()
-    n = original.number_of_nodes()
-
-    G.add_nodes_from(range(initial_nodes))
-    # קישור ראשוני בין כל ההתחלתיים
-    for i in range(initial_nodes):
-        for j in range(i + 1, initial_nodes):
-            G.add_edge(i, j)
-
-    for new_node in range(initial_nodes, n):
-        G.add_node(new_node)
-        degrees = dict(G.degree())
-        total_degree = sum(degrees.values())
-
-        for existing_node in G.nodes():
-            if existing_node == new_node:
-                continue
-
-            if total_degree == 0:
-                if random.random() < 1 / (len(G.nodes()) - 1):
-                    G.add_edge(new_node, existing_node)
-            else:
-                prob = degrees[existing_node] / total_degree
-                if random.random() < prob:
-                    G.add_edge(new_node, existing_node)
-
-    return G
+# def build_probabilistic_preferential_attachment_graph(initial_nodes=3, seed=None):
+#     """
+#     בונה גרף שבו כל צומת חדש מנסה להתחבר לכל הקיימים, על פי הסתברות פרופורציונלית לדרגה.
+#
+#     :param n: מספר הקודקודים הסופי בגרף
+#     :param initial_nodes: מספר קודקודים להתחלה
+#     :param seed: לצורך שיחזור
+#     :return: גרף NetworkX
+#     """
+#     if seed is not None:
+#         random.seed(seed)
+#
+#     G = build_graph()
+#     n = original.number_of_nodes()
+#
+#     G.add_nodes_from(range(initial_nodes))
+#     # קישור ראשוני בין כל ההתחלתיים
+#     for i in range(initial_nodes):
+#         for j in range(i + 1, initial_nodes):
+#             G.add_edge(i, j)
+#
+#     for new_node in range(initial_nodes, n):
+#         G.add_node(new_node)
+#         degrees = dict(G.degree())
+#         total_degree = sum(degrees.values())
+#
+#         for existing_node in G.nodes():
+#             if existing_node == new_node:
+#                 continue
+#
+#             if total_degree == 0:
+#                 if random.random() < 1 / (len(G.nodes()) - 1):
+#                     G.add_edge(new_node, existing_node)
+#             else:
+#                 prob = degrees[existing_node] / total_degree
+#                 if random.random() < prob:
+#                     G.add_edge(new_node, existing_node)
+#
+#     return G
 
 
 def plot_log_log_degree_distribution(G, label):
@@ -545,18 +587,56 @@ def plot_degree_distribution_basic(G):
 
 
 # ----- הפעלה -----
+
+
+def handle_all_graphs():
+    originalGraph = build_graph()
+    gnmGraph = build_gnm_graph()
+    configurationGraph = build_configuration_model()
+    blockGraph = block_model()
+    gnpGraph = build_gnp_graph()
+    preferentialAttachmentGraph = build_preferential_attachment_model()
+
+    all_graphs = {
+        "Game of Thrones": originalGraph,
+        "G(n,p)": gnpGraph,
+        "G(n,m)": gnpGraph,
+        "Configuration Model": configurationGraph,
+        "Block Model": blockGraph,
+        "Preferential Attachment": preferentialAttachmentGraph
+    }
+
+    draw_Graph(originalGraph)
+    draw_Graph(gnmGraph, "G(n, m) Graph")
+    draw_Graph(configurationGraph, "Configuration Model Graph")
+    draw_Graph(blockGraph, "Block Model Graph")
+    draw_Graph(gnpGraph, "G(n, p) Graph")
+    draw_Graph(preferentialAttachmentGraph, "preferential Attachment Graph")
+
+
+
+    for name, G in all_graphs.items():
+        plot_degree_distribution(G, name)
+
+    for name, G in all_graphs.items():
+        draw_Graph(giant_component(G), name+" Giant component")
+
+
 if __name__ == "__main__":
+
     # draw_all_graphes()
     # plot_all_degree_distribution()
-    #
+
     # draw_Graph(giant_component(),"Giant component")
-    #
+
     # print("average_distance: ",average_distance())
 
     # G = build_graph()
     # check_power_law(G)
     #
     # check_powerlaw_builtin(G)
+
+    handle_all_graphs()
 
     calculate_all_average_distance()
 
